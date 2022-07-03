@@ -1,0 +1,526 @@
+Unit CrtHP;
+
+const 
+
+daube:array[1..32] of byte;
+
+ScanToAscii : array [0..255] of byte =
+
+  0, 65, 66, 67, 68, 69, 70, 71, 72, 73,  0, 74, 75, 76, 27,  0,
+ 26, 77, 78, 79, 80, 16, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90,
+  0, 55, 56, 57, 42,  0, 52, 53, 54, 45,  0, 49, 50, 51, 43,  0,
+ 48, 46, 32, 13,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+  0, 97, 98, 99,100,101,102,103,104,105,  0,106,107,108,  0,  0,
+  0,109,110,111,112, 17,113,114,115,116,117,118,119,120,121,122,
+  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+  0, 65, 66, 67, 68, 69, 70, 71, 72, 73,  0, 74, 75, 76,  0,  0,
+  0,  77, 78, 79, 80, 0, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90,
+  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+  0,  0, 32, 13,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0;
+
+{ Fonction GotoXY }
+
+
+procedure GotoXY (x, y: byte);
+begin
+  asm
+    a=r1			* de x=0, y=0 à x=... et y=7
+    d1=a
+    a=dat1 b	* Abcisse de 0 à 32
+*    a=a+a b	* si un caractere tous les 8 pixels
+    c=r4
+    d1=c
+    dat1=a b
+    a=r1
+    d1=a
+    d1=d1+ 2
+    a=dat1 b
+    a=a+a b		* on X par 6 PIXELS/Ligne: fonte 8
+	 b=a b
+    a=a+a b		
+    a=a+b b		
+    c=r4
+    d1=c
+    d1=d1+ 2
+    dat1=a b
+  end;
+end;
+
+{ Saisie de caractères }
+
+function readkey : char;
+begin
+ asm
+     lc(2) 0
+     :bclrdk
+     gosbvl #4840
+     goc bclrdk
+     a=r1
+     d1=a
+     dat1=c b
+ end;
+ result := chr( ScanToAscii[ ord(result) ] );
+end;
+
+procedure SeeCursor;
+begin
+  asm
+    A=R4
+    D1=A
+    D1=D1+ 2	* adresse ordonnée curseur
+    LC(5) #0
+    C=DAT1 B
+    C=C+C A		* X C par 34 (34 Q. par ligne)
+    B=C A
+    CSL A
+    C=B+C A
+    D1=D1- 2	* adresse abcisse curseur
+    LA(5) #0
+    A=DAT1 B	* abcisse en A
+    A=C+A A		* C+abcisse
+*    LC(5) #EE
+    LC(5) #AA		* curseur en 6eme ligne: 5*34
+    A=C+A A
+    C=R3			* adresse ecran
+    A=C+A A
+    D1=A			* Future adresse du curseur
+    C=DAT1 B	* 
+    LA(2) #0F	* taille du curseur
+    A=C!A B
+    B=A B
+*    LA(2) #7F
+    LA(2) #0F
+    C=C&A B
+    A=B B
+    A=A-C B   
+    DAT1=A B
+  end;
+end;
+
+procedure LeftCursor;
+begin
+  asm
+    a=r4		* adresse abcisse
+    d1=a		* si ABCISSE=0 fin ligne precedente
+    a=dat1 b
+    ?a=0 b
+    goyes atstartline
+*    lc(2) 2
+    lc(2) 1		* en 6 pixels
+    a=a-c b
+    dat1=a b
+    goto notlfirstline
+    :atstartline
+    d1=d1+ 2
+    a=dat1 b
+*    lc(2) 8
+    lc(2) 6		* en 6 pixels
+    ?c>a b
+    goyes notlfirstline
+    a=a-c b
+    dat1=a b
+    d1=d1- 2
+*    la(2) #1E
+    la(2) #20	* retour au 32eme caractere ligne precedente
+    dat1=a b
+    :notlfirstline
+  end;
+end;
+
+procedure RightCursor;
+begin
+  asm
+    a=r4
+    d1=a
+    a=dat1 b
+    a=a+1 b
+*    a=a+1 b
+    dat1=a b		* ABCISSE curseur
+    lc(2) #21		* diff. de 32 ?
+    ?c#a b
+    goyes notendofline
+    la(2) 0
+    dat1=a b		* efface curseur
+    d1=d1+ 2
+    a=dat1 b		*  en cas de fin de ligne
+    lc(2) #32
+    ?c<a b
+    goyes notendofline
+*    lc(2) 8
+    lc(2) 6
+    a=c+a b
+    dat1=a b
+    :notendofline   
+  end;
+end;
+
+{ Fonctions de gestion des touches }
+
+procedure Waitkey;
+begin
+   asm
+      :wklp
+     gosbvl #4840		*POPKEY		
+     goc wklp
+  end;
+end;
+
+function Keypressed : boolean;
+begin
+  asm
+     gosbvl #4999		*KeyInBuff?
+     la(1) 1
+     goc yaunetouche
+     la(1) 0
+     :yaunetouche
+    c=r1
+    d1=c
+    dat1=a p
+ end;
+end;
+
+
+{ Les fonctions WRITE }
+{ ------------------- }
+
+
+procedure Write (c:char);
+begin
+  asm
+*Sauvegarde de l'adresse de la pile dans R0
+    ad0ex
+    r0=a
+*Effectue C=[R4+2] ... l'adresse [R4+2] contient l'ordonnée courante du curseur
+    A=R4
+    D1=A
+    D1=D1+ 2
+    LC(5) #0
+    C=DAT1 B
+*Multiplie C par 34 (34 quartets par ligne dans la mémoire écran)
+    C=C+C A
+    B=C A
+    CSL A
+    C=B+C A
+*Effectue [R4]++  (incrémente l'abscisse courante du curseur)
+    D1=D1- 2
+    LA(5) #0
+    A=DAT1 B
+    B=A B		*abscisse en B
+    A=A+1 B		* R4+1 !
+*    A=A+1 B	
+    DAT1=A B
+*Calcule D1=C(calculé plus haut) + abscisse(B) + adresse écran(R3)
+    A=B B
+    A=C+A A
+    C=R3
+    A=C+A A
+    D1=A
+*Charge le code ascii du caractère à afficher = [R1] dans C
+    a=r1
+    d0=a
+    c=dat0 b
+*S'il s'agit d'un code de retour chariot on va a "nextline"
+    la(2) #d
+    ?c=a b
+    goyes nextline
+*Calcule l'adresse dans laquelle se trouve le caractère à afficher dans D0
+*c'est à dire #84DA4 (base de la table) + [C(code ASCII)] * 16(nb de
+*quartets par caractère)
+
+    la(5) #0
+*	Implantation Minifontes
+    a=c+a b
+    a=a+a a		* X par 6 (pixels par quartet)
+    c=a a
+    a=a+a a
+    a=c+a a
+    lc(5) #812CF	*Minifonte
+    a=c+a a
+    d0=a
+
+*Recopie la source D0 vers la destination D1 en faisant 
+*6 fois la recopie de 1 quartet/ligne 
+*( #22=34 soit le nombre de quartets d'une ligne)
+    lc(2) #6
+    :bclafchar2
+    a=dat0 b
+    asl b			*RAZ bit poids fort de A.B
+    asr b
+    dat1=a b
+    d0=d0+ #1		*D0+34
+    d1=d1+ #10
+    d1=d1+ #10
+    d1=d1+ #2
+    c=c-1 b
+    ?C#0 b
+    GOYES bclafchar2
+
+*Teste si l'on arrive à la fin de la ligne (abscisse #20=32)
+    a=r4
+    d1=a
+    a=dat1 b   
+    lc(2) #21
+    ?c=a b
+    goyes nextline
+    golong nonextline
+
+*Passe à la ligne suivante, abscisse=0
+    :nextline
+    a=r4
+    d1=a
+    la(2) 0
+    dat1=a b
+
+*Faut il scroller (ordonnée = #38= 56?)
+    d1=d1+ 2
+    a=dat1 b
+    lc(2) #36			*10 lignes de 6 pixels = 60
+    ?c=a b
+
+*Non? alors on calcule l'ordonnée suivante
+    goyes ScrlUpChar
+    lc(2) 6		* Nbre de pixels/ligne
+    a=c+a b
+    dat1=a b
+    goto nonextline
+
+*Oui? c parti pour le scroll (on ne modifie pas l'ordonnée)
+    :ScrlUpChar		* A ADAPTER POUR LES MINIFONTES...
+    A=R3			* l'ecran comprend 8*8 lignes et chaque
+    D1=A			* ligne 34 Q.
+*    LC(5) #110		* Taille de 8 lignes en Q.
+    LC(5) #CC		* Taille de 6 lignes en Q.
+    A=C+A A
+    D0=A				* adresse 8 (6) lignes + bas
+
+* On recopie toutes les lignes, 6 lignes plus haut 
+* sauf les 4 finales à faire à la main...
+
+    LC(2) #76		* 136*56=7616 pix=1904 Q=770H-->/16=77H !
+    :BCSCRPLE
+    A=DAT0 W		* 6*10=60 = 56+4
+    DAT1=A W
+    D0=D0+ 16
+    D1=D1+ 16
+    C=C-1 B
+    ?C#0 B
+    GOYES BCSCRPLE
+    LC(2) #CC		* (4)*136= ->544Q/2=272=110H -1 ligne
+    :BCSCRPLE_1
+    A=DAT0 B
+    DAT1=A B
+    D0=D0+ 2
+    D1=D1+ 2
+    C=C-1 B
+    ?C#0 B
+    GOYES BCSCRPLE_1
+    
+
+*Y a plus qu'à effacer les 4 -1 dernières lignes
+*(4*34 quartets=136 et 544Q/2=272 mots= $110)    
+	 LA(5) 0
+    LC(2) #CC
+    :BCSCRPLE2
+    DAT1=A B
+    D1=D1+ 2
+    C=C-1 B
+    ?C#0 B
+    GOYES BCSCRPLE2
+
+*Récupère D0
+    :nonextline
+    a=r0
+    d0=a
+  end;
+end;
+
+procedure Writeln (c:char);
+begin
+  write (c);
+  write (chr(13));
+end;
+
+procedure Write (s:string);
+var i:byte;
+begin
+    for i:=1 to length(s) do Write (s[i]);
+end;
+
+procedure Writeln (s:string);
+begin
+  Write(s);
+  Write (chr(13));
+end;
+
+procedure Write (i:integer);
+begin
+  write (inttostr(i));
+end;
+
+procedure Writeln (i:integer);
+begin
+  write (inttostr(i));
+  write (chr(13));
+end;
+
+procedure Write (b:byte);
+begin
+  write (inttostr(b));
+end;
+
+procedure Writeln (b:byte);
+begin
+  write (inttostr(b));
+  write (chr(13));
+end;
+
+procedure Write (r:real);
+begin
+  write (realtostr(r));
+end;
+
+procedure Writeln (r:real);
+begin
+  write (realtostr(r));
+  write (chr(13));
+end;
+
+
+{ Fonction INPUT allégée }
+
+
+function LightRead (n: byte): string;
+var ch: char;
+    lt: byte;
+begin
+  lt := 0;
+  ch := ' ';
+  write ('_'); LeftCursor;
+  while (ch <> chr(13)) or (lt=0) do
+  begin
+    ch := readkey;
+    if (ch in [' '..'z']) and (lt<n) then
+    begin
+      lt := lt+ 1;
+      result[lt] := ch;
+      write (ch);
+      write ('_'); LeftCursor;
+    end;
+    if (ch=chr(16)) and (lt>0) then
+    begin
+      lt := lt- 1;
+      LeftCursor;
+      write ('_'); write (' '); LeftCursor; LeftCursor;
+    end;
+  end;
+  write (' ');  write (chr(13));
+  result[0] := chr (lt);
+end;
+
+
+{ Les fonctions READ }
+{ ------------------ }
+
+
+procedure read (var r: string);
+var ch: char;
+       lt, ct : byte;
+       i, j, k: byte;
+       axc, ayc : byte;
+begin
+  SeeCursor;
+  lt := 0;
+  ct := 1;
+  while lt = 0 do
+  begin
+   ch := ' ';
+   while ch <> chr(13) do
+   begin
+    ch := readkey;
+    if ch = chr(27) and ct>1 then begin SeeCursor; LeftCursor; SeeCursor; ct := ct-1; end;
+    if ch = chr(26) and ct<lt+1 then begin SeeCursor; RightCursor; SeeCursor; ct := ct+1; end;
+    if ch = chr(16) and ct>1 then begin SeeCursor; LeftCursor; SeeCursor; ct:=ct-1; ch := chr(17); end;
+    if ch = chr(17) and ct<=lt and lt>=1 then
+    begin
+      for i:=ct to lt-1 do begin r[i] := r[i+1]; write(r[i]); end;
+      write (' ');
+      for i:=ct to lt do LeftCursor;
+      SeeCursor;
+      lt := lt - 1;
+    end;
+    if ch>=' ' and lt<128 then 
+    begin     
+      write (ch);
+      if ct<=lt then 
+      begin
+         for i:=lt+1 downto ct+1 do r[i] := r[i-1];
+         for i:=ct+1 to lt+1 do write (r[i]);
+         for i:=ct+1 to lt+1 do LeftCursor;
+      end;
+      r[ct] := ch;
+      SeeCursor;
+      lt := lt + 1;
+      Ct := Ct + 1;
+    end;
+   end;
+  end;
+  SeeCursor;
+  for i := 1 to lt do if r[i] <> ' ' then exit;
+  for j := lt downto 1 do if r[j] <> ' ' then exit; 
+  k := j-i+1;
+  r[0] := chr (k);
+  for k := 1 to j-i+1 do r[k] := r[i+k-1];
+end;
+
+procedure readln (var r: string);
+begin
+  read (r);
+  write (chr(13));
+end;
+
+procedure read (var b : byte);
+var s : string;
+begin
+  read(s);
+  b:=strtoint(s);
+end;
+
+procedure readln (var b:byte);
+begin
+  read (b);
+  write (chr(13));
+end;
+
+procedure read (var i : integer);
+var s : string;
+begin
+  read(s);
+  i:=strtoint(s);
+end;
+
+
+procedure readln (var i:integer);
+var s : string;
+begin
+  read(s);
+  i:=strtoint(s);
+  write (chr(13));
+end;
+
+procedure read (var r : real);
+var s : string;
+begin
+  read(s);
+  r:=strtoreal(s);
+end;
+
+procedure readln (var r : real);
+begin
+  read (r);
+  write (chr(13));
+end;

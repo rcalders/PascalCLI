@@ -1,0 +1,56 @@
+UNIT SystemHP;
+
+procedure DisableInterrupt;
+begin
+  asm
+    INTOFF
+  end;
+end;
+
+procedure EnableInterrupt;
+begin
+  asm
+    INTON
+  end;
+end;
+
+procedure DispOff;
+begin
+  asm
+    LA(5) #100
+    LC(1) #7
+    D1=A
+    A=DAT1 P
+    A=C&A P
+    DAT1=A P
+  end;
+end;
+
+procedure DispOn;
+begin
+  asm
+    LA(5) #100
+    LC(1) #8
+    D1=A
+    A=DAT1 P
+    A=C!A P
+    DAT1=A P
+  end;
+end;
+
+procedure Contraste (c: byte);
+begin
+  asm
+     A=R1
+     D1=A
+     A=DAT1 B
+     LC(5) #101
+     D1=C
+     DAT1=A P
+     D1=D1+ 1
+     A=DAT1 P
+     LC(1) #E
+     A=C&A P
+     DAT1=A P
+  end;
+end;

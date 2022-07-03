@@ -1,0 +1,510 @@
+unit GameHp;
+
+{ Fonctions graphiques }
+
+procedure ScrollUp;
+begin
+   asm
+      ad0ex
+      r0=a
+      c=r3
+      d0=c
+      rstk=c
+      d1=(5) #80319
+      lc(5) #22
+      gosbvl #670c
+      c=rstk
+      d1=c
+      lc(5) #83C
+      gosbvl #670C
+      d0=(5) #80319
+      lc(5) #22
+      gosbvl #670C   
+      a=r0
+      d0=a
+   end;
+end;
+
+procedure ScrollDown;
+begin
+   asm
+      ad0ex
+      r0=a
+      c=r3
+      la(5) #85E
+      c=c+a a
+      d0=c
+      rstk=c
+      d1=(5) #8033B
+      lc(5) #22
+      gosbvl #66B9
+      c=rstk
+      d1=c
+      lc(5) #83C
+      gosbvl #66B9
+      d0=(5) #8033B
+      lc(5) #22
+      gosbvl #66B9 
+      a=r0
+      d0=a
+  end;
+end;
+
+procedure PutBloc (X, Y: integer; Handle: integer);
+begin
+  asm
+    ad0ex
+    r0=a
+    A=R1
+    D1=A
+    D1=D1+ 5
+    C=DAT1 A
+    C=C+C A
+    B=C A
+    CSL A
+    C=B+C A
+    D1=D1- 5
+    A=DAT1 A
+    ASRB.F A
+    ASRB.F A
+    A=C+A A
+    C=R3
+    A=C+A A
+    D0=A
+    a=r1
+    d1=a
+    d1=d1+ #a
+    a=dat1 a
+    c=r4
+    a=c+a a
+    d1=a
+    la(5) 0	
+    c=dat1 b
+    d1=d1+ 2
+    a=dat1 b
+    d1=d1+ 2
+    d=c b
+    b=a b
+    :BCBLKL
+    a=dat1 p
+    dat0=a p
+    d1=d1+ 1
+    d0=d0+ 1
+    c=c-1 b
+    ?c#0 b
+    goyes BCBLKL
+    la(2) #22
+    c=d b
+    a=a-c b
+    cd0ex
+    c=c+a a
+    d0=c
+    c=d b
+    b=b-1 b
+    ?b#0 b
+    goyes BCBLKL
+    a=r0
+    d0=a
+  end;
+end;
+
+procedure PutSprite (X, Y: integer; Handle: integer);
+begin
+  asm
+    ad0ex
+    r0=a
+    A=R1
+    D1=A
+    D1=D1+ 5
+    C=DAT1 A
+    C=C+C A
+    B=C A
+    CSL A
+    C=B+C A
+    D1=D1- 5
+    A=DAT1 A
+    B=A P
+    ASRB.F A
+    ASRB.F A
+    A=C+A A
+    C=R3
+    A=C+A A
+    D0=A
+
+    LC(2) 3
+    c=b&c p
+    p=c 0
+    c=p 15
+    d=c s
+    p== 0
+    
+    a=r1
+    d1=a
+    d1=d1+ #a
+    a=dat1 a
+    c=r4
+    a=c+a a
+    d1=a
+
+    c=dat1 b
+    c=c-1 b
+    P=C 0
+    d1=d1+ 2
+    a=dat1 b
+    d1=d1+ 2
+    a=a-1 b
+    b=a b
+
+    :BCSPRL
+
+    a=0 a
+
+    a=dat1 wp
+
+     ***
+     c=d s
+     c=c-1 s
+     goc fdec
+     a=a+a a
+     c=c-1 s
+     goc fdec
+     a=a+a a
+     c=c-1 s
+     goc fdec
+     a=a+a a
+     :fdec     
+     ***
+
+    c=dat0 a
+    a=c!a a
+    dat0=a a
+
+    c=0 a
+    c=p 0
+    ad1ex
+    a=c+a a
+    a=a+1 a
+    d1=a
+
+    d0=d0+ 16
+    d0=d0+ 16
+    d0=d0+ 2
+
+    b=b-1 b
+    gonc BCSPRL
+
+    p== 0
+    a=r0
+    d0=a
+  end;
+end;
+
+function CanPutSprite (X, Y: integer; Handle: integer): boolean;
+begin
+  asm
+    ad0ex
+    r0=a
+    A=R1
+    D1=A
+    D1=D1+ 1
+    D1=D1+ 5
+    C=DAT1 A
+    C=C+C A
+    B=C A
+    CSL A
+    C=B+C A
+    D1=D1- 5
+    A=DAT1 A
+    B=A P
+    ASRB.F A
+    ASRB.F A
+    A=C+A A
+    C=R3
+    A=C+A A
+    D0=A
+
+    LC(2) 3
+    c=b&c p
+    p=c 0
+    c=p 15
+    d=c s
+    p== 0
+    
+    a=r1
+    d1=a
+    d1=d1+ 1
+    d1=d1+ #a
+    a=dat1 a
+    c=r4
+    a=c+a a
+    d1=a
+
+    c=dat1 b
+    c=c-1 b
+    P=C 0
+    d1=d1+ 2
+    a=dat1 b
+    d1=d1+ 2
+    a=a-1 b
+    b=a b
+
+    :BCSPRL
+
+    a=0 a
+
+    a=dat1 wp
+
+     ***
+     c=d s
+     c=c-1 s
+     goc fdec
+     a=a+a a
+     c=c-1 s
+     goc fdec
+     a=a+a a
+     c=c-1 s
+     goc fdec
+     a=a+a a
+     :fdec     
+     ***
+
+    c=dat0 a
+    a=c&a a
+    ?a#0 a
+    goyes resNON
+
+    c=0 a
+    c=p 0
+    ad1ex
+    a=c+a a
+    a=a+1 a
+    d1=a
+
+    d0=d0+ 16
+    d0=d0+ 16
+    d0=d0+ 2
+
+    b=b-1 b
+    gonc BCSPRL
+
+    :resOUI
+    C=0 P
+    C=C+1 P
+    goto resFIN
+    :resNON
+    C=0 P
+    :resFIN
+    a=r1
+    d1=a
+    dat1=c p
+
+    p== 0
+    a=r0
+    d0=a
+  end;
+end;
+
+
+procedure AppearCool (Nb: integer);
+begin
+  asm
+    ad0ex
+    r0=a
+    a=r1
+    d1=a
+    c=dat1 a
+    a=r4
+    a=c+a a
+    lc(5) #7E4
+    a=c+a a
+    b=a a
+    lc(2) #3F
+    d=c b
+    :bigboucleefct
+     a=r3
+    d1=a
+    a=b a
+    d0=a
+    a=dat0 w
+    dat1=a w
+    d0=d0+ 16
+    d1=d1+ 16
+    a=dat0 w
+    dat1=a w
+    ?d=0 b
+    goyes fineffect
+    c=d b
+    a=r3
+    d0=a
+    d1=a
+    d1=d1+ 16
+    d1=d1+ 16
+    d1=d1+ 2
+    :BoucleEfct
+     a=dat0 w
+    dat1=a w
+    d0=d0+ 16
+    d1=d1+ 16
+    a=dat0 w
+    dat1=a w
+    d0=d0+ 16
+    d1=d1+ 16
+    d0=d0+ 2
+    d1=d1+ 2
+    c=c-1 b
+    ?c#0 b
+    goyes BoucleEfct
+    a=b a
+    lc(5) #20
+    a=a-c a
+    b=a a
+    d=d-1 b
+    lc(5) #200
+    :waitefct1
+    c=c-1 a
+    ?c#0 a
+    goyes waitefct1
+    goto bigboucleEfct
+    :fineffect
+    a=r0
+    d0=a
+  end;
+end;
+
+procedure DisappearCool;
+begin
+  asm
+    ad0ex
+    r0=a
+    a=r3
+    b=a a
+    lc(2) #3F
+    d=c b
+    :bigboucleefctd
+     a=r3
+    d1=a
+    a=b a
+    d0=a
+    a=dat0 w
+    dat1=a w
+    d0=d0+ 16
+    d1=d1+ 16
+    a=dat0 w
+    dat1=a w
+    ?d=0 b
+    goyes fineffectd
+    lc(2) #3f
+    c=c-d b
+    ?c=0 b
+    goyes premln
+    a=r3
+    d0=a
+    d1=a
+    d1=d1+ 16
+    d1=d1+ 16
+    d1=d1+ 2
+    :BoucleEfctd
+     a=dat0 w
+    dat1=a w
+    d0=d0+ 16
+    d1=d1+ 16
+    a=dat0 w
+    dat1=a w
+    d0=d0+ 16
+    d1=d1+ 16
+    d0=d0+ 2
+    d1=d1+ 2
+    c=c-1 b
+    ?c#0 b
+    goyes BoucleEfctd
+    :Premln
+    a=b a
+    lc(5) #22
+    a=c+a a
+    b=a a
+    d=d-1 b
+    lc(5) #200
+    :waitefct2
+    c=c-1 a
+    ?c#0 a
+    goyes waitefct2
+    goto bigboucleEfctd
+    :fineffectd
+    a=r0
+    d0=a
+  end;
+end;
+
+procedure SetScreenOffset (l : byte);
+begin
+  asm
+     A=R1
+     D1=A
+     C=0 A
+     C=DAT1 B
+     C=C+C A
+     B=C A
+     CSL A
+     C=B+C A
+     A=R3
+     A=C+A A
+     D1=(5) #120
+     DAT1=A A    
+  end;
+end;
+
+{ Gestion HARD des touches }
+
+
+function KeyPressedIO (o, i: byte): boolean;
+begin
+  asm
+     a=r1
+     d1=a
+     d1=d1+ 1
+     lc(5) 0
+     c=dat1 b
+     out=c
+     gosbvl #1160
+     d1=d1+ 2
+     la(5) 0
+     a=dat1 b
+     a=c&a a
+     ?a=0 a
+     goyes nopres
+     la(1) 1
+     :nopres
+     d1=d1- 3
+     dat1=a p
+  end;
+end;
+
+function LeftPressed: boolean;
+begin
+    LeftPressed := KeyPressedIO (64, 4);
+end;
+
+function RightPressed: boolean;
+begin
+    RightPressed := KeyPressedIO (64, 1);
+end;
+
+function UpPressed: boolean;
+begin
+    UpPressed := KeyPressedIO (128, 2);
+end;
+
+function DownPressed: boolean;
+begin
+    DownPressed := KeyPressedIO (64, 2);
+end;
+
+function EnterPressed: boolean;
+begin
+  result := KeyPressedIO (16, 16);
+end;
+
+function ExitPressed: boolean;
+begin
+    ExitPressed := KeyPressedIO (16, 1);
+end;

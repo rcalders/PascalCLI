@@ -1,0 +1,479 @@
+Unit CrtHP;
+
+const 
+
+daube:array[1..32] of byte;
+
+ScanToAscii : array [0..255] of byte =
+
+  0,  1,  2,  3,  4,  5,  6,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+ 27, 25, 26, 24,  0,  0,  0,  0,  0, 13, 45,  0, 17, 16,  0, 55,
+ 56, 57,  0,  0, 52, 53, 54,  0,  0, 49, 50, 51, 45,  0, 48, 46,
+ 32, 43,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+  0, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79,
+ 80, 81, 82, 83, 84, 85, 86, 87, 88,  0, 89, 90,  0,  0,  0,  0,
+  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+ 32,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0;
+
+{ Fonction GotoXY }
+
+
+procedure GotoXY (x, y: byte);
+begin
+  asm
+    a=r1
+    d1=a
+    a=dat1 b
+    a=a+a b
+    c=r4
+    d1=c
+    dat1=a b
+    a=r1
+    d1=a
+    d1=d1+ 2
+    a=dat1 b
+    a=a+a b
+    a=a+a b
+    a=a+a b
+    c=r4
+    d1=c
+    d1=d1+ 2
+    dat1=a b
+  end;
+end;
+
+
+
+{ Saisie de caractères }
+
+function readkey : char;
+begin
+ asm
+     lc(2) 0
+     :bclrdk
+     gosbvl #4840
+     goc bclrdk
+     a=r1
+     d1=a
+     dat1=c b
+ end;
+ result := chr( ScanToAscii[ ord(result) ] );
+end;
+
+procedure SeeCursor;
+begin
+  asm
+    A=R4
+    D1=A
+    D1=D1+ 2
+    LC(5) #0
+    C=DAT1 B
+    C=C+C A
+    B=C A
+    CSL A
+    C=B+C A
+    D1=D1- 2
+    LA(5) #0
+    A=DAT1 B
+    A=C+A A
+    LC(5) #EE
+    A=C+A A
+    C=R3
+    A=C+A A
+    D1=A
+    C=DAT1 B
+    LA(2) #7F
+    A=C!A B
+    B=A B
+    LA(2) #7F
+    C=C&A B
+    A=B B
+    A=A-C B   
+    DAT1=A B
+  end;
+end;
+
+procedure LeftCursor;
+begin
+  asm
+    a=r4
+    d1=a
+    a=dat1 b
+    ?a=0 b
+    goyes atstartline
+    lc(2) 2
+    a=a-c b
+    dat1=a b
+    goto notlfirstline
+    :atstartline
+    d1=d1+ 2
+    a=dat1 b
+    lc(2) 8
+    ?c>a b
+    goyes notlfirstline
+    a=a-c b
+    dat1=a b
+    d1=d1- 2
+    la(2) #1E
+    dat1=a b
+    :notlfirstline
+  end;
+end;
+
+procedure RightCursor;
+begin
+  asm
+    a=r4
+    d1=a
+    a=dat1 b
+    a=a+1 b
+    a=a+1 b
+    dat1=a b
+    lc(2) #20
+    ?c#a b
+    goyes notendofline
+    la(2) 0
+    dat1=a b
+    d1=d1+ 2
+    a=dat1 b
+    lc(2) #32
+    ?c<a b
+    goyes notendofline
+    lc(2) 8
+    a=c+a b
+    dat1=a b
+    :notendofline   
+  end;
+end;
+
+{ Fonctions de gestion des touches }
+
+procedure Waitkey;
+begin
+   asm
+      :wklp
+     gosbvl #4840
+     goc wklp
+  end;
+end;
+
+function Keypressed : boolean;
+begin
+  asm
+     gosbvl #4999
+     la(1) 1
+     goc yaunetouche
+     la(1) 0
+     :yaunetouche
+    c=r1
+    d1=c
+    dat1=a p
+ end;
+end;
+
+
+{ Les fonctions WRITE }
+{ ------------------- }
+
+
+procedure Write (c:char);
+begin
+  asm
+    ad0ex
+    r0=a
+    A=R4
+    D1=A
+    D1=D1+ 2
+    LC(5) #0
+    C=DAT1 B
+    C=C+C A
+    B=C A
+    CSL A
+    C=B+C A
+    D1=D1- 2
+    LA(5) #0
+    A=DAT1 B
+    B=A B
+    A=A+1 B
+    A=A+1 B
+    DAT1=A B
+    A=B B
+    A=C+A A
+    C=R3
+    A=C+A A
+    D1=A
+    a=r1
+    d0=a
+    c=dat0 b
+    la(2) #d
+    ?c=a b
+    goyes nextline
+    la(5) #000E1
+    a=c+a b
+    a=a+a a
+    a=a+a a
+    a=a+a a
+    a=a+a a
+    lc(5) #7B447
+    a=c+a a
+    d0=a
+    lc(2) #4
+    :bclafchar2
+    a=dat0 b
+    dat1=a b
+    d0=d0+ #2
+    d1=d1+ #10
+    d1=d1+ #10
+    d1=d1+ #2
+    a=dat0 b
+    dat1=a b
+    d0=d0+ #2
+    d1=d1+ #10
+    d1=d1+ #10
+    d1=d1+ #2
+    c=c-1 b
+    ?C#0 b
+    GOYES bclafchar2
+    a=r4
+    d1=a
+    a=dat1 b   
+    lc(2) #20
+    ?c=a b
+    goyes nextline
+    golong nonextline
+    :nextline
+    a=r4
+    d1=a
+    la(2) 0
+    dat1=a b
+    d1=d1+ 2
+    a=dat1 b
+    lc(2) #38
+    ?c=a b
+    goyes ScrlUpChar
+    lc(2) 8
+    a=c+a b
+    dat1=a b
+    goto nonextline
+    :ScrlUpChar
+    A=R3
+    D1=A
+    LC(5) #110
+    A=C+A A
+    D0=A
+    LC(2) 77
+    :BCSCRPLE
+    A=DAT0 W
+    DAT1=A W
+    D0=D0+ 16
+    D1=D1+ 16
+    C=C-1 B
+    ?C#0 B
+    GOYES BCSCRPLE
+    LA(5) 0
+    LC(2) 11
+    :BCSCRPLE2
+    DAT1=A W
+    D1=D1+ 16
+    C=C-1 B
+    ?C#0 B
+    GOYES BCSCRPLE2
+    :nonextline
+    a=r0
+    d0=a
+  end;
+end;
+
+procedure Writeln (c:char);
+begin
+  write (c);
+  write (chr(13));
+end;
+
+procedure Write (s:string);
+var i:byte;
+begin
+    for i:=1 to length(s) do Write (s[i]);
+end;
+
+procedure Writeln (s:string);
+begin
+  Write(s);
+  Write (chr(13));
+end;
+
+procedure Write (i:integer);
+begin
+  write (inttostr(i));
+end;
+
+procedure Writeln (i:integer);
+begin
+  write (inttostr(i));
+  write (chr(13));
+end;
+
+procedure Write (b:byte);
+begin
+  write (inttostr(b));
+end;
+
+procedure Writeln (b:byte);
+begin
+  write (inttostr(b));
+  write (chr(13));
+end;
+
+procedure Write (r:real);
+begin
+  write (realtostr(r));
+end;
+
+procedure Writeln (r:real);
+begin
+  write (realtostr(r));
+  write (chr(13));
+end;
+
+
+{ Fonction INPUT allégée }
+
+
+function LightRead (n: byte): string;
+var ch: char;
+    lt: byte;
+begin
+  lt := 0;
+  ch := ' ';
+  write ('_'); LeftCursor;
+  while (ch <> chr(13)) or (lt=0) do
+  begin
+    ch := readkey;
+    if (ch in ['A'..'z']) and (lt<n) then
+    begin
+      lt := lt+ 1;
+      result[lt] := ch;
+      write (ch);
+      write ('_'); LeftCursor;
+    end;
+    if (ch=chr(16)) and (lt>0) then
+    begin
+      lt := lt- 1;
+      LeftCursor;
+      write ('_'); write (' '); LeftCursor; LeftCursor;
+    end;
+  end;
+  write (' ');  write (chr(13));
+  result[0] := chr (lt);
+end;
+
+
+{ Les fonctions READ }
+{ ------------------ }
+
+
+procedure read (var r: string);
+var ch: char;
+       lt, ct : byte;
+       i, j, k: byte;
+       axc, ayc : byte;
+begin
+  SeeCursor;
+  lt := 0;
+  ct := 1;
+  while lt = 0 do
+  begin
+   ch := ' ';
+   while ch <> chr(13) do
+   begin
+    ch := readkey;
+    if ch = chr(27) and ct>1 then begin SeeCursor; LeftCursor; SeeCursor; ct := ct-1; end;
+    if ch = chr(26) and ct<lt+1 then begin SeeCursor; RightCursor; SeeCursor; ct := ct+1; end;
+    if ch = chr(16) and ct>1 then begin SeeCursor; LeftCursor; SeeCursor; ct:=ct-1; ch := chr(17); end;
+    if ch = chr(17) and ct<=lt and lt>=1 then
+    begin
+      for i:=ct to lt-1 do begin r[i] := r[i+1]; write(r[i]); end;
+      write (' ');
+      for i:=ct to lt do LeftCursor;
+      SeeCursor;
+      lt := lt - 1;
+    end;
+    if ch>=' ' and lt<128 then 
+    begin     
+      write (ch);
+      if ct<=lt then 
+      begin
+         for i:=lt+1 downto ct+1 do r[i] := r[i-1];
+         for i:=ct+1 to lt+1 do write (r[i]);
+         for i:=ct+1 to lt+1 do LeftCursor;
+      end;
+      r[ct] := ch;
+      SeeCursor;
+      lt := lt + 1;
+      Ct := Ct + 1;
+    end;
+   end;
+  end;
+  SeeCursor;
+  for i := 1 to lt do if r[i] <> ' ' then exit;
+  for j := lt downto 1 do if r[j] <> ' ' then exit; 
+  k := j-i+1;
+  r[0] := chr (k);
+  for k := 1 to j-i+1 do r[k] := r[i+k-1];
+end;
+
+procedure readln (var r: string);
+begin
+  read (r);
+  write (chr(13));
+end;
+
+procedure read (var b : byte);
+var s : string;
+begin
+  read(s);
+  b:=strtoint(s);
+end;
+
+procedure readln (var b:byte);
+begin
+  read (b);
+  write (chr(13));
+end;
+
+procedure read (var i : integer);
+var s : string;
+begin
+  read(s);
+  i:=strtoint(s);
+end;
+
+
+procedure readln (var i:integer);
+var s : string;
+begin
+  read(s);
+  i:=strtoint(s);
+  write (chr(13));
+end;
+
+procedure read (var r : real);
+var s : string;
+begin
+  read(s);
+  r:=strtoreal(s);
+end;
+
+procedure readln (var r : real);
+begin
+  read (r);
+  write (chr(13));
+end;

@@ -1,0 +1,450 @@
+UNIT MathsHP_49;
+{ adapaté pour la 49/50 par Gilles Carpentier - 2011 }
+function Abs (x: integer): integer;
+begin
+  asm
+    A=R1
+    D1=A
+    D1=D1+ 5
+    A=DAT1 A
+    D1=D1- 5
+    LC(5) #7FFFF
+    ?C>A A
+    GOYES NoNeg
+    A=-A A
+    :NoNeg
+    DAT1=A
+  end;
+end;
+
+function Abs (x: real): real;
+begin
+   asm
+    A=R1
+    D1=A
+    D1=D1+ 16
+    A=DAT1 W
+    D1=D1- 16
+    A=0 S
+    DAT1=A W
+  end;
+end;
+
+function Cos (x: real): real;
+begin
+  asm
+    c=r1
+    d1=c
+    dat0=c a
+    d0=d0+ 5
+    c=r2
+    dat0=c a
+    d0=d0+ 5
+    c=r3
+    dat0=c a
+    d0=d0+ 5
+    c=r4
+    dat0=c a
+    cd0ex
+    rstk=c
+    d1=d1+ 16
+    a=dat1 w
+    gosbvl #31131	*SPLITA pour 49G et suivantes
+    HS=0 3
+    gosbvl #308e1	*GETANGMODE pour 49 etc.
+    gosbvl #310ba *COSF 
+    gosbvl #2f47d	*PACKSB
+    P== 0
+    SETHEX
+    c=rstk
+    d0=c
+    c=dat0 a
+    r4=c
+    d0=d0- 5
+    c=dat0 a
+    r3=c
+    d0=d0- 5
+    c=dat0 a
+    r2=c
+    d0=d0- 5
+    c=dat0 a
+    r1=c
+    d1=c
+    dat1=a w
+  end;
+end;
+
+function Sin (x: real): real;
+begin
+  asm
+    c=r1
+    d1=c
+    dat0=c a
+    d0=d0+ 5
+    c=r2
+    dat0=c a
+    d0=d0+ 5
+    c=r3
+    dat0=c a
+    d0=d0+ 5
+    c=r4
+    dat0=c a
+    cd0ex
+    rstk=c
+    d1=d1+ 16
+    a=dat1 w
+    gosbvl #31131	*SPLITA pour 49G et suivantes
+    HS=0 3
+    gosbvl #308e1	*GETANGMODE pour 49 etc.
+    gosbvl #310B3 *SINF 
+    gosbvl #2f47d	*PACKSB
+    P== 0
+    SETHEX
+    c=rstk
+    d0=c
+    c=dat0 a
+    r4=c
+    d0=d0- 5
+    c=dat0 a
+    r3=c
+    d0=d0- 5
+    c=dat0 a
+    r2=c
+    d0=d0- 5
+    c=dat0 a
+    r1=c
+    d1=c
+    dat1=a w
+  end;
+end;
+
+function Tan (x: real): real;
+begin
+  asm
+    c=r1
+    d1=c
+    dat0=c a
+    d0=d0+ 5
+    c=r2
+    dat0=c a
+    d0=d0+ 5
+    c=r3
+    dat0=c a
+    d0=d0+ 5
+    c=r4
+    dat0=c a
+    cd0ex
+    rstk=c
+    d1=d1+ 16
+    a=dat1 w
+
+    gosbvl #31131	*SPLITA pour 49G et suivantes
+    HS=0 3
+    gosbvl #308e1	*GETANGMODE pour 49 etc.
+    gosbvl #310C1 *TANF 
+    gosbvl #2f47d	*PACKSB
+
+    P== 0
+    SETHEX
+    c=rstk
+    d0=c
+    c=dat0 a
+    r4=c
+    d0=d0- 5
+    c=dat0 a
+    r3=c
+    d0=d0- 5
+    c=dat0 a
+    r2=c
+    d0=d0- 5
+    c=dat0 a
+    r1=c
+    d1=c
+    dat1=a w
+  end;
+end;
+
+function Sqr (x: real): real;
+begin
+  asm
+    c=r1
+    d1=c
+    dat0=c a
+    d0=d0+ 5
+    c=r2
+    dat0=c a
+    d0=d0+ 5
+    c=r3
+    dat0=c a
+    d0=d0+ 5
+    c=r4
+    dat0=c a
+    cd0ex
+    rstk=c
+    d1=d1+ 16
+    a=dat1 w
+
+
+    gosbvl #31131	*SPLITA pour 49G et suivantes
+    HS=0 3
+    gosbvl #317D2 *SQRT
+    gosbvl #2f47d	*PACKSB
+
+    P== 0
+    SETHEX
+    c=rstk
+    d0=c
+    c=dat0 a
+    r4=c
+    d0=d0- 5
+    c=dat0 a
+    r3=c
+    d0=d0- 5
+    c=dat0 a
+    r2=c
+    d0=d0- 5
+    c=dat0 a
+    r1=c
+    d1=c
+    dat1=a w
+  end;
+end;
+
+function Ln (x: real): real;
+begin
+  asm
+    c=r1
+    d1=c
+    dat0=c a
+    d0=d0+ 5
+    c=r2
+    dat0=c a
+    d0=d0+ 5
+    c=r3
+    dat0=c a
+    d0=d0+ 5
+    c=r4
+    dat0=c a
+    cd0ex
+    rstk=c
+    d1=d1+ 16
+    a=dat1 w
+
+    gosbvl #31131	*SPLITA pour 49G et suivantes
+    HS=0 3
+    gosbvl #3107B *LN
+    gosbvl #2f47d	*PACKSB
+
+    P== 0
+    SETHEX
+    c=rstk
+    d0=c
+    c=dat0 a
+    r4=c
+    d0=d0- 5
+    c=dat0 a
+    r3=c
+    d0=d0- 5
+    c=dat0 a
+    r2=c
+    d0=d0- 5
+    c=dat0 a
+    r1=c
+    d1=c
+    dat1=a w
+  end;
+end;
+
+function Log (x: real): real;
+begin
+  asm
+    c=r1
+    d1=c
+    dat0=c a
+    d0=d0+ 5
+    c=r2
+    dat0=c a
+    d0=d0+ 5
+    c=r3
+    dat0=c a
+    d0=d0+ 5
+    c=r4
+    dat0=c a
+    cd0ex
+    rstk=c
+    d1=d1+ 16
+    a=dat1 w
+
+    gosbvl #31131	*SPLITA pour 49G et suivantes
+    HS=0 3
+    gosbvl #31082 *LOG
+    gosbvl #2f47d	*PACKSB
+
+    P== 0
+    SETHEX
+    c=rstk
+    d0=c
+    c=dat0 a
+    r4=c
+    d0=d0- 5
+    c=dat0 a
+    r3=c
+    d0=d0- 5
+    c=dat0 a
+    r2=c
+    d0=d0- 5
+    c=dat0 a
+    r1=c
+    d1=c
+    dat1=a w
+  end;
+end;
+
+function ASin (x: real): real;
+begin
+  asm
+    c=r1
+    d1=c
+    dat0=c a
+    d0=d0+ 5
+    c=r2
+    dat0=c a
+    d0=d0+ 5
+    c=r3
+    dat0=c a
+    d0=d0+ 5
+    c=r4
+    dat0=c a
+    cd0ex
+    rstk=c
+    d1=d1+ 16
+    a=dat1 w
+    gosbvl #31131	*SPLITA pour 49G et suivantes
+    HS=0 3
+    gosbvl #308e1	*GETANGMODE pour 49 etc.
+    gosbvl #310CF *ASINF 
+    gosbvl #2f47d	*PACKSB
+    P== 0
+    SETHEX
+    c=rstk
+    d0=c
+    c=dat0 a
+    r4=c
+    d0=d0- 5
+    c=dat0 a
+    r3=c
+    d0=d0- 5
+    c=dat0 a
+    r2=c
+    d0=d0- 5
+    c=dat0 a
+    r1=c
+    d1=c
+    dat1=a w
+  end;
+end;
+
+function ACos (x: real): real;
+begin
+  asm
+    c=r1
+    d1=c
+    dat0=c a
+    d0=d0+ 5
+    c=r2
+    dat0=c a
+    d0=d0+ 5
+    c=r3
+    dat0=c a
+    d0=d0+ 5
+    c=r4
+    dat0=c a
+    cd0ex
+    rstk=c
+    d1=d1+ 16
+    a=dat1 w
+    gosbvl #31131	*SPLITA pour 49G et suivantes
+    HS=0 3
+    gosbvl #308e1	*GETANGMODE pour 49 etc.
+    gosbvl #310D6 *ACOSF
+    gosbvl #2f47d	*PACKSB
+    P== 0
+    SETHEX
+    c=rstk
+    d0=c
+    c=dat0 a
+    r4=c
+    d0=d0- 5
+    c=dat0 a
+    r3=c
+    d0=d0- 5
+    c=dat0 a
+    r2=c
+    d0=d0- 5
+    c=dat0 a
+    r1=c
+    d1=c
+    dat1=a w
+  end;
+end;
+
+function ATan (x: real): real;
+begin
+  asm
+    c=r1
+    d1=c
+    dat0=c a
+    d0=d0+ 5
+    c=r2
+    dat0=c a
+    d0=d0+ 5
+    c=r3
+    dat0=c a
+    d0=d0+ 5
+    c=r4
+    dat0=c a
+    cd0ex
+    rstk=c
+    d1=d1+ 16
+    a=dat1 w
+    gosbvl #31131	*SPLITA pour 49G et suivantes
+    HS=0 3
+    gosbvl #308e1	*GETANGMODE pour 49 etc.
+    gosbvl #310C8 *ATANF
+    gosbvl #2f47d	*PACKSB
+    P== 0
+    SETHEX
+    c=rstk
+    d0=c
+    c=dat0 a
+    r4=c
+    d0=d0- 5
+    c=dat0 a
+    r3=c
+    d0=d0- 5
+    c=dat0 a
+    r2=c
+    d0=d0- 5
+    c=dat0 a
+    r1=c
+    d1=c
+    dat1=a w
+  end;
+end;
+
+function Random (z: integer): integer;
+var k:integer;
+begin
+  asm
+    la(5) #104
+    D1=A
+    c=dat1 a
+    la(5) #FFF
+    c=c&a a
+    a=r1
+    d1=a
+    d1=d1+ #A
+    dat1=c a
+  end;
+  result := k*z div 4096;
+end;

@@ -1,0 +1,39 @@
+Unit SoundHP;
+
+procedure Beep (f, d: integer);
+begin
+  asm
+    cd0ex
+    d0=c
+    rstk=c
+    c=r1
+    dat0=c a
+    d0=d0+ 5
+    c=r2
+    dat0=c a
+    d0=d0+ 5
+    c=r3
+    dat0=c a
+    a=r1
+    d1=a
+    c=dat1 a
+    d=c a    
+    d1=d1+ 5
+    c=dat1 a
+*    gosbvl #17A6
+    gosbvl #267F3
+    c=rstk
+    d0=c
+    c=dat0 a
+    r1=c
+    d0=d0+ 5
+    c=dat0 a
+    r2=c
+    d0=d0+ 5
+    c=dat0 a
+    r3=c
+    d0=d0- #a
+  end;
+end;
+
+end.

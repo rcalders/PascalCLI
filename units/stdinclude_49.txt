@@ -1,0 +1,1069 @@
+* Opérations sur les entiers
+
+:@FH@OP_INTEGER_DIVISION
+D0=D0- 5
+C=DAT0 A
+D0=D0- 5
+A=DAT0 A
+B=A A
+LA(5) #7FFFF
+?C<A A
+GOYES @OID1
+C=-C A
+A=B A
+A=-A A
+GOTO @OID2
+:@OID1
+A=B A
+:@OID2
+D=C A
+LC(5) #7FFFF
+?C>A A
+GOYES @OID3
+A=-A A
+C=D A
+GOSBVL #3F24
+C=-C A
+GOTO @OID4
+:@OID3
+C=D A
+GOSBVL #3F24
+:@OID4
+A=C A
+DAT0=A A
+D0=D0+ 5
+RTN
+:@FH@END
+
+:@FH@OP_INTEGER_MODULO
+D0=D0- 5
+C=DAT0 A
+D0=D0- 5
+A=DAT0 A
+B=A A
+LA(5) #7FFFF
+?C<A A
+GOYES @OIM1
+C=-C A
+A=B A
+A=-A A
+GOTO @OIM2
+:@OIM1
+A=B A
+:@OIM2
+D=C A
+LC(5) #7FFFF
+?C>A A
+GOYES @OIM3
+A=-A A
+DAT0=C A
+D0=D0+ 5
+C=D A
+GOSBVL #3F24
+A=-A A
+DAT0=C A
+D0=D0+ 5
+A=C+A A
+GOTO @OIM4
+:@OIM3
+C=D A
+GOSBVL #3F24
+:@OIM4
+DAT0=A A
+D0=D0+ 5
+RTN
+:@FH@END
+
+* Opérations sur les flottants
+
+:@FH@OP_REAL_NEG
+SETDEC
+A=DAT0 W
+A=-A-1 S
+DAT0=A W
+D0=D0+ 16
+SETHEX
+RTN
+:@FH@END
+
+:@FH@OP_REAL_BINAIRE_START
+D0=D0- 16
+C=DAT0 W
+D0=D0- 16
+A=DAT0 W
+B=C W
+C=A W
+D=C W
+C=R1
+DAT0=C A
+D0=D0+ 5
+C=R2
+DAT0=C A
+D0=D0+ 5
+C=R3
+DAT0=C A
+D0=D0+ 5
+C=R4
+DAT0=C A
+C=RSTK
+A=C A
+CD0EX
+D0=C
+RSTK=C
+C=A A
+RSTK=C
+C=D W
+A=C W
+C=B W
+SETDEC
+*GOSBVL #2BCA0
+GOSBVL #31187
+RTN
+:@FH@END
+
+:@FH@OP_REAL_BINAIRE_END
+*GOSBVL #29E21
+GOSBVL #2F47D
+SETHEX
+P== 0
+C=RSTK
+R1=C
+C=RSTK
+D0=C
+C=R1
+RSTK=C
+C=DAT0 A
+R4=C
+D0=D0- 5
+C=DAT0 A
+R3=C
+D0=D0- 5
+C=DAT0 A
+R2=C
+D0=D0- 5
+C=DAT0 A
+R1=C
+DAT0=A W
+D0=D0+ 16
+RTN
+:@FH@END
+
+:@FH@OP_REAL_ADDITION
+GOSUB @FH@OP_REAL_BINAIRE_START
+HS=0 3
+*GOSBVL #2B7DC	
+GOSBVL #315BB   *ADDF
+GOSUB @FH@OP_REAL_BINAIRE_END
+RTN
+:@FH@END
+
+:@FH@OP_REAL_SOUSTRACTION
+GOSUB @FH@OP_REAL_BINAIRE_START
+C=-C-1 S
+HS=0 3
+*GOSBVL #2B7DC
+GOSBVL #315BB   *ADDF
+GOSUB @FH@OP_REAL_BINAIRE_END
+RTN
+:@FH@END
+
+:@FH@OP_REAL_MULTIPLICATION
+GOSUB @FH@OP_REAL_BINAIRE_START
+HS=0 3
+*GOSBVL #2B91E	
+GOSBVL #316FD   *MULTF
+GOSUB @FH@OP_REAL_BINAIRE_END
+RTN
+:@FH@END
+
+:@FH@OP_REAL_DIVISION
+GOSUB @FH@OP_REAL_BINAIRE_START
+HS=0 3
+*GOSBVL #2B977
+GOSBVL #31756   *DIVF
+*GOSBVL #2AEC5	* ????
+GOSUB @FH@OP_REAL_BINAIRE_END
+RTN
+:@FH@END
+
+:@FH@OP_REAL_INFERIOR
+GOSUBL @FH@OP_REAL_SOUSTRACTION
+?A#0 S
+GOYES @ORI2
+A=0 P
+GOTO @ORI1
+:@ORI2
+LA(1) 1
+:@ORI1
+DAT0=A P
+D0=D0+ 1
+RTN
+:@FH@END
+
+:@FH@OP_REAL_SUPERIOR
+GOSUBL @FH@OP_REAL_SOUSTRACTION
+A=0 P
+?A=0 S
+GOYES @ORI2
+GOTO @ORI1
+:@ORI2
+ASLC W
+?A=0 S
+GOYES @ORI1
+LA(1) 1
+:@ORI1
+DAT0=A P
+D0=D0+ 1
+RTN
+:@FH@END
+
+* Gestion des chaines de caractère
+
+:@FH@SAVE_STRING
+AD0EX
+LC(5) #105
+A=A-C A
+D0=A
+R0=A
+A=DAT0 A
+D1=A
+D0=D0+ 5
+LC(5) 0
+C=DAT0 B
+C=C+1 A
+:@SS1
+A=DAT0 B
+DAT1=A B
+D0=D0+ 2
+D1=D1+ 2
+C=C-1 A
+?C#0 A
+GOYES @SS1
+A=R0
+D0=A
+RTN
+:@FH@END
+
+:@FH@LOAD_STRING
+D0=D0- 5
+A=DAT0 A
+D1=A
+AD0EX
+D0=A
+R0=A
+LC(5) 0
+C=DAT1 B
+C=C+1 A
+:@LS1
+A=DAT1 B
+DAT0=A B
+D0=D0+ 2
+D1=D1+ 2
+C=C-1 A
+?C#0 A
+GOYES @LS1
+A=R0
+LC(5) #100
+A=C+A A
+D0=A
+RTN
+:@FH@END
+
+:@FH@OP_STRING_ADDITION
+AD0EX
+LC(5) #100
+A=A-C A
+D1=A
+A=A-C A
+D0=A
+R0=A
+LC(5) 0
+C=DAT0 B
+C=C+1 B
+C=C+C A
+A=C+A A
+D0=A
+LC(5) 0
+C=DAT1 B
+D=C B
+D1=D1+ 2
+:@OSA1
+A=DAT1 B
+DAT0=A B
+D0=D0+ 2
+D1=D1+ 2
+C=C-1 A
+?C#0 A
+GOYES @OSA1
+A=0 B
+DAT0=A B
+C=D B
+A=R0
+D0=A
+A=DAT0 B
+A=C+A B
+DAT0=A B
+AD0EX
+LC(5) #100
+A=C+A A
+D0=A
+RTN
+:@FH@END
+
+:@FH@OP_STRING_EQUAL
+AD0EX
+LC(5) #100
+A=A-C A
+D1=A
+A=A-C A
+D0=A
+R0=A
+LC(5) 0
+C=DAT0 B
+A=DAT1 B
+?C#A B
+GOYES @OSE2
+?C=0 B
+GOYES @OSE3
+D0=D0+ 2
+D1=D1+ 2
+D=C A
+:@OSE1
+A=DAT1 B
+C=DAT0 B
+?C#A B
+GOYES @OSE2
+D0=D0+ 2
+D1=D1+ 2
+D=D-1 A
+?D#0 A
+GOYES @OSE1
+:@OSE3
+LA(1) 1
+C=R0
+D0=C
+DAT0=A P
+D0=D0+ 1
+RTN
+:@OSE2
+A=0 P
+C=R0
+D0=C
+DAT0=A P
+D0=D0+ 1
+RTN
+:@FH@END
+
+:@FH@OP_STRING_SUPERIOR
+AD0EX
+D0=A
+LC(5) #100
+A=A-C A
+D1=A
+C=A A
+A=0 A
+A=DAT1 B
+A=A+1 A
+A=A+A A
+A=C+A A
+D1=A
+A=0 B
+DAT1=A B
+*
+AD0EX
+D0=A
+LC(5) #200
+A=A-C A
+D1=A
+C=A A
+A=0 A
+A=DAT1 B
+A=A+1 A
+A=A+A A
+A=C+A A
+D1=A
+A=0 B
+DAT1=A B
+*
+AD0EX
+LC(5) #100
+A=A-C A
+D0=A
+A=A-C A
+D1=A
+C=DAT0 B
+C=C+1 B
+B=C B
+:@OSS1
+D0=D0+ 2
+D1=D1+ 2
+A=DAT1 B
+C=DAT0 B
+?C<A B
+GOYES @OSS2
+B=B-1 B
+?B=0 B
+GOYES @OSS4
+?C=A B
+GOYES @OSS1
+:@OSS4
+A=R0
+LC(5) #200
+A=A-C A
+D0=A
+A=0 P
+GOTO @OSS3
+:@OSS2
+A=R0
+LC(5) #200
+A=A-C A
+D0=A
+LA(1) 1
+:@OSS3
+DAT0=A P
+D0=D0+ 1
+RTN
+:@FH@END
+
+:@FH@OP_STRING_INFERIOR
+AD0EX
+D0=A
+LC(5) #100
+A=A-C A
+D1=A
+C=A A
+A=0 A
+A=DAT1 B
+A=A+1 A
+A=A+A A
+A=C+A A
+D1=A
+A=0 B
+DAT1=A B
+*
+AD0EX
+D0=A
+LC(5) #200
+A=A-C A
+D1=A
+C=A A
+A=0 A
+A=DAT1 B
+A=A+1 A
+A=A+A A
+A=C+A A
+D1=A
+A=0 B
+DAT1=A B
+*
+AD0EX
+LC(5) #100
+A=A-C A
+D0=A
+A=A-C A
+D1=A
+C=DAT0 B
+C=C+1 B
+B=C B
+:@OSI1
+D0=D0+ 2
+D1=D1+ 2
+A=DAT1 B
+C=DAT0 B
+?C>A B
+GOYES @OSI2
+B=B-1 B
+?B=0 B
+GOYES @OSI4
+?C=A B
+GOYES @OSI1
+:@OSI4
+A=R0
+LC(5) #200
+A=A-C A
+D0=A
+A=0 P
+GOTO @OSI3
+:@OSI2
+A=R0
+LC(5) #200
+A=A-C A
+D0=A
+LA(1) 1
+:@OSI3
+DAT0=A P
+D0=D0+ 1
+RTN
+:@FH@END
+
+* Les conversions
+
+:@FH@CV_CHAR_STRING
+D0=D0- 2
+AD0EX
+D0=A
+R0=A
+A=DAT0 B
+LC(2) 1
+DAT0=C B
+D0=D0+ 2
+DAT0=A B
+A=R0
+LC(5) #100
+A=C+A A
+D0=A
+RTN
+:@FH@END
+
+:@FH@CV_REAL_INTEGER
+D0=D0- 16
+* Si le réel < 1 (EXP-x)
+A=DAT0 X
+LC(3) #500
+?C>A X
+GOYES @CRI1
+A=0 A
+DAT0=A A
+D0=D0+ 5
+RTN
+:@CRI1
+* Si le réel est trop grand
+A=DAT0 X
+LC(3) #005
+?C<A X
+GOYES @CRI2
+?C>A X
+GOYES @CRI3
+A=DAT0 M
+LC(16) #0524288000000005
+?C>A M
+GOYES @CRI3
+:@CRI2
+LA(1) 9
+ASRC W
+LA(5) #7FFFE
+?C#A S
+GOYES @CRI4
+A=A+1 A
+A=A+1 A
+:@CRI4
+DAT0=A A
+D0=D0+ 5
+RTN
+:@CRI3
+* Conversion
+A=DAT0 W
+C=A S
+C=A X
+A=0 S
+ASR W
+ASR W
+ASR W
+ASR W
+?C=0 X
+GOYES @CRI5
+:@CRI6
+ASLC W
+C=C-1 X
+?C#0 X
+GOYES @CRI6
+:@CRI5
+CSLC W
+A=C P
+LC(1) 6
+D=C P
+C=A W
+A=0 A
+B=A A
+:@CRI7
+B=B+B A  * Multiplie B par
+A=B A
+B=B+B A
+B=B+B A
+B=A+B A  * 10
+A=0 A
+CSLC W
+A=C P
+B=A+B A  * Ajoute le prochain chiffre
+D=D-1 P
+?D#0 P
+GOYES @CRI7
+CSRC W
+CSRC W
+CSRC W
+CSRC W
+?C=0 XS
+GOYES @CRI8
+B=-B A
+:@CRI8
+A=B A
+RTN
+:@FH@END
+
+:@FH@CV_INTEGER_REAL
+C=A A
+* Marque d'un nombre positif
+B=0 S
+LA(5) #7FFFF
+?C<A A
+GOYES @CIR0
+C=-C A
+B=B+1 S		* TEST OK
+* Marque d'un nombre négatif
+:@CIR0
+A=0 W 
+* Vide les quartets de A
+D=0 S 
+* le champ D:S
+B=C A
+* Lit l'INTEGER dans B:A
+DAT0=A W
+* Le réel est vide pour l'instant
+:@CIR1
+A=B A
+LC(5) #A
+GOSBVL #3F24
+*P== 0
+P= 0
+B=C A
+* B := B / 10
+C=DAT0 W
+C=C+A W
+CSRC W
+* DAT0 = DAT0 + reste suivi d'un décalage à droite
+DAT0=C W
+D=D+1 S
+* Compteur du nombre de chiffres dans D:S
+?B#0 A
+GOYES @CIR1
+D=D-1 S
+CSRC W
+DSLC W
+C=D P
+?B=0 S
+GOYES @CIR2
+* LA(1) 9
+LA(1) 1	* TEST OK
+ASRC W
+C=A S
+:@CIR2
+A=C W
+RTN
+:@FH@END
+
+:@FH@CV_INTEGER_STRING
+C=A A
+AD0EX
+D0=A
+R0=A
+B=0 S
+LA(5) #7FFFF
+?C<A A
+GOYES @CRS1
+C=-C A
+B=B+1 S
+:@CRS1
+A=0 W
+B=C A
+D=0 W
+D=D-1 B
+C=D W
+DAT0=C W
+:@CRS2
+A=B A
+LC(5) #A		*10 en C
+GOSBVL #3F24	*Division entiere  par 10
+P== 0
+B=C A
+C=DAT0 W
+D=C W
+C=A B
+DSL W
+DSL W
+D=C B
+C=D W
+DAT0=C W
+?B#0 A
+GOYES @CRS2
+C=DAT0 W
+D=C W
+LA(2) #2F
+?B=0 S
+GOYES @CRS3
+LC(2) #FD
+DSL W
+DSL W
+D=C B
+:@CRS3
+C=D B
+C=C+1 B
+?C=0 B
+GOYES @CRS4
+C=C+A B
+D0=D0+ 2
+DAT0=C B
+DSR W
+DSR W
+GOTO @CRS3
+:@CRS4
+AD0EX
+D0=D0+ 2
+C=0 B
+DAT0=C B
+C=R0
+A=A-C A
+ASRB A
+D0=C
+DAT0=A B
+LA(5) #100
+A=C+A A
+D0=A
+RTN
+:@FH@END
+
+:@FH@CV_REAL_STRING
+* initialisation
+C=A W
+AD0EX
+R0=A
+D0=A
+D=C W
+B=C X
+DSLC W 
+* premier quartet
+C=D P
+LA(1) 1
+?C#A P
+GOYES @CIS1
+LC(2) #2D 
+* signe '-'
+D0=D0+ 2
+DAT0=C B
+:@CIS1
+LA(2) #30
+DSLC W 
+* Premier chiffre
+C=0 B
+C=D P
+C=C+A B
+D0=D0+ 2
+DAT0=C B
+LC(2) #2E * le '.'
+D0=D0+ 2
+DAT0=C B
+DSLC W  * deux chiffres après la virgule
+C=0 B
+C=D P
+C=C+A B
+D0=D0+ 2
+DAT0=C B
+DSLC W
+C=0 B
+C=D P
+C=C+A B
+D0=D0+ 2
+DAT0=C B
+LC(2) #45 
+* le 'E'
+D0=D0+ 2
+DAT0=C B
+LA(3) #500
+?A>B X
+GOYES @CIS2
+SETDEC
+B=-B X
+LC(2) #2D 
+* signe '-'
+D0=D0+ 2
+DAT0=C B
+SETHEX
+:@CIS2
+LA(2) #30
+BSRC W
+BSRC W
+C=0 B
+* trois chiffres pour l'exposant
+C=B P
+C=C+A B
+D0=D0+ 2
+DAT0=C B
+BSLC W
+C=0 B
+C=B P
+C=C+A B
+D0=D0+ 2
+DAT0=C B
+BSLC W
+C=0 B
+C=B P
+C=C+A B
+D0=D0+ 2
+DAT0=C B
+C=0 B
+D0=D0+ 2
+DAT0=C B
+D0=D0- 2
+AD0EX
+C=R0
+A=A-C A
+ASRB A
+D0=C
+DAT0=A B
+LA(5) #100
+A=C+A A
+D0=A
+RTN
+:@FH@END
+
+:@FH@CV_STRING_INTEGER
+AD0EX
+LC(5) #100
+A=A-C A
+R0=A
+D0=A
+C=DAT0 B
+D=C B
+D0=D0+ 2
+A=0 S
+A=DAT0 B
+LC(2) #2D
+?C#A B
+GOYES @CSI2
+A=A+1 S
+D=D-1 B
+D0=D0+ 2
+:@CSI2
+B=0 A
+C=D B
+:@CSI1
+A=B A
+A=A+A A
+B=B+B A
+B=B+B A
+B=B+B A
+B=A+B A
+A=0 A
+A=DAT0 B
+D0=D0+ 2
+B=A+B A
+LA(2) #30
+B=B-A A
+C=C-1 B
+?C#0 B
+GOYES @CSI1
+A=B A
+?A=0 S
+GOYES @CSI3
+A=-A A
+:@CSI3
+C=R0
+D0=C
+RTN
+:@FH@END
+
+:@FH@CV_STRING_REAL
+* finir la chaine par 0
+AD0EX
+D0=A          
+LC(5) #100
+A=A-C A
+D1=A
+C=A A
+A=0 A
+A=DAT1 B
+A=A+1 A
+A=A+A A
+A=C+A A
+D1=A
+A=0 B
+DAT1=A B
+*
+AD0EX
+LC(5) #100
+A=A-C A
+D0=A
+R0=A
+D0=D0+ 2
+* -> résultat dans B
+B=0 W
+* le signe
+A=DAT0 B
+LC(2) #2D
+?C#A B
+GOYES @CSR1
+*LA(1) 9
+LA(1) 1 * TEST OK
+B=A P
+D0=D0+ 2
+:@CSR1
+BSL W
+* les premiers chiffres
+D=0 S
+* compteur pour l'exposant
+A=0 S
+* compteur pour le décalage
+:@CSR2
+A=DAT0 B
+LC(2) #30
+A=A-C B
+LC(2) #9
+?C<A B
+GOYES @CSR3
+B=A P
+BSL W
+D=D+1 S
+A=A+1 S
+D0=D0+ 2
+GOTO @CSR2
+:@CSR3
+* s'il y a un '.'
+A=DAT0 B
+LC(2) #2E
+?C#A B
+GOYES @CSR4
+D0=D0+ 2
+:@CSR5
+A=DAT0 B
+LC(2) #30
+A=A-C B
+LC(2) #9
+?C<A B
+GOYES @CSR4
+B=A P
+BSL W
+A=A+1 S
+D0=D0+ 2
+GOTO @CSR5
+:@CSR4
+* on effectue les décalages nécessaires
+A=A+1 S
+A=A+1 S
+A=A+1 S
+A=A+1 S
+A=A+1 S
+?A=0 S
+GOYES @CSR6
+:@CSR7
+BSL W
+A=A+1 S
+?A#0 S
+GOYES @CSR7
+:@CSR6
+BSL W
+BSL W
+BSL W
+* l'exposant
+A=0 S
+D=0 A
+A=DAT0 B
+LC(2) #45
+?C#A B
+GOYES @CSR8
+D0=D0+ 2
+* signe de l'exposant
+A=DAT0 B
+LC(2) #2D
+?C#A B
+GOYES @CSR9
+A=A+1 S
+D0=D0+ 2
+:@CSR9
+* valeur de l'exposant -> D champ A format BCD
+:@CSR10
+A=DAT0 B
+LC(2) #30
+A=A-C B
+LC(2) #9
+?C<A B
+GOYES @CSR11
+DSL A
+C=A P
+D=C P
+D0=D0+ 2
+GOTO @CSR10
+:@CSR11
+* fin de gestion de l'exposant, s'il est négatif faire +1000
+:@CSR8
+C=D A
+A=C A
+?A=0 S
+GOYES @CSR12
+SETDEC
+A=-A X
+SETHEX
+:@CSR12
+* Ajouter le décalage pour le nombre de chiffres
+D=0 X
+DSLC W
+D=D-1 X
+C=D X
+SETDEC
+A=C+A X
+SETHEX
+* exposant dans A champ X à transférer dans B champ X format BCD
+B=A X
+* On place le résultat sur la pile
+A=R0
+D0=A
+A=B W
+RTN
+:@FH@END
+
+:@FH@OP_STRING_COPY
+D0=D0- 2
+C=DAT0 B
+D=C B * compteur dans D
+D0=D0- 2
+C=DAT0 B
+B=C B * position dans B
+AD0EX
+LC(5) #100
+A=A-C A
+D0=A
+C=DAT0 B
+?B<=C B
+GOYES @OSC1
+* chaine nulle
+A=0 B
+DAT0=A B
+AD0EX
+LC(5) #100
+A=C+A A
+D0=A
+:@OSC1
+A=C B
+C=B B
+C=D+C B
+C=C-1 B
+?C<=A B
+GOYES @OSC3
+C=C-A B
+D=D-C B
+:@OSC3
+C=D B
+DAT0=C B
+D0=D0+ 2
+AD0EX
+D0=A
+R0=A
+C=0 A
+C=B B
+C=C-1 B
+C=C+C B
+A=C+A A
+D1=A
+C=D B
+:@OSC2
+A=DAT1 B
+DAT0=A B
+D0=D0+ 2
+D1=D1+ 2
+D=D-1 B
+?D#0 B
+GOYES @OSC2
+A=R0
+LC(5) #FE
+A=C+A A
+D0=A
+RTN
+:@FH@END

@@ -1,0 +1,31 @@
+UNIT Default;
+
+procedure ClrScr;
+begin
+  asm
+    a=r3
+    d1=a
+    la(16) 0
+    lc(2) #11
+    :loopclrscr
+    dat1=a w
+    d1=d1+ 16
+    dat1=a w
+    d1=d1+ 16
+    dat1=a w
+    d1=d1+ 16
+    dat1=a w
+    d1=d1+ 16
+    dat1=a w
+    d1=d1+ 16
+    dat1=a w
+    d1=d1+ 16
+    dat1=a w
+    d1=d1+ 16
+    dat1=a w
+    d1=d1+ 16
+    c=c-1 b
+    ?C#0 b
+    goyes loopclrscr
+  end;
+end;

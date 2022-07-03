@@ -1,0 +1,685 @@
+unit GraphHp;
+
+{ procédures au niveau bas }
+
+procedure putpixel (x, y : integer);
+begin
+  asm
+    A=R1
+    D1=A
+    D1=D1+ 5
+    C=DAT1 A
+    C=C+C A
+    B=C A
+    CSL A
+    C=B+C A
+    D1=D1- 5
+    A=DAT1 A
+    B=A A
+    ASRB.F A
+    ASRB.F A
+    A=C+A A
+    C=R3
+    A=C+A A
+    D1=A
+    LC(1) #3
+    C=B&C P
+    C=-C P
+    P=C 0
+    LC(4) #8421
+    p= 0
+    A=DAT1 P 
+    A=C!A P
+    DAT1=A P
+  end;
+end;
+
+procedure clearpixel (x, y : integer);
+begin
+  asm
+    A=R1
+    D1=A
+    D1=D1+ 5
+    C=DAT1 A
+    C=C+C A
+    B=C A
+    CSL A
+    C=B+C A
+    D1=D1- 5
+    A=DAT1 A
+    B=A A
+    ASRB.F A
+    ASRB.F A
+    A=C+A A
+    C=R3
+    A=C+A A
+    D1=A
+    LC(1) #3
+    C=B&C P
+    C=-C P
+    P=C 0
+    LC(4) #8421
+    p= 0
+    C=-C-1 P
+     A=DAT1 P
+    A=C&A P
+    DAT1=A P
+  end;
+end;
+
+function Point (x,y : integer): boolean;
+begin
+  asm
+    A=R1
+    D1=A
+    D1=D1+ 6
+    C=DAT1 A
+    C=C+C A
+    B=C A
+    CSL A
+    C=B+C A
+    D1=D1- 5
+    A=DAT1 A
+    B=A A
+    ASRB.F A
+    ASRB.F A
+    A=C+A A
+    C=R3
+    A=C+A A
+    D1=A
+    LC(1) #3
+    C=B&C P
+    C=-C P
+    P=C 0
+    LC(4) #8421
+    p= 0
+    A=DAT1 P 
+    A=C&A P
+    ?A=0 P
+    goyes zarbe
+    la(1) 1
+    :zarbe
+    c=r1
+    d1=c
+    DAT1=A P
+  end;
+end;
+
+procedure LineV (x, y1, y2: integer);
+begin
+  asm
+    A=R1
+    D1=A
+    D1=D1+ 10
+    C=DAT1 A
+    D=C A
+    D1=D1- 5
+    C=DAT1 A
+    D=D-C A
+    D=D+1 A
+    C=C+C A
+    B=C A
+    CSL A
+    C=B+C A
+    D1=D1- 5
+    A=DAT1 A
+    B=A A
+    ASRB.F A
+    ASRB.F A
+    A=C+A A
+    C=R3
+    A=C+A A
+    D1=A
+    LC(1) #3
+    C=B&C P
+    C=-C P
+    P=C 0
+    LC(4) #8421
+    p= 0
+    :Boucle
+    A=DAT1 P 
+    A=C!A P
+    DAT1=A P
+    D1=D1+ 16
+    D1=D1+ 16
+    D1=D1+ 2
+    D=D-1 A
+    ?D#0 A
+    GOYES Boucle
+  end;
+end;
+
+procedure ClearLineV (x, y1, y2: integer);
+begin
+  asm
+    A=R1
+    D1=A
+    D1=D1+ 10
+    C=DAT1 A
+    D=C A
+    D1=D1- 5
+    C=DAT1 A
+    D=D-C A
+    D=D+1 A
+    C=C+C A
+    B=C A
+    CSL A
+    C=B+C A
+    D1=D1- 5
+    A=DAT1 A
+    B=A A
+    ASRB.F A
+    ASRB.F A
+    A=C+A A
+    C=R3
+    A=C+A A
+    D1=A
+    LC(1) #3
+    C=B&C P
+    C=-C P
+    P=C 0
+    LC(4) #8421
+    p= 0
+    C=-C-1 P
+    :Boucle
+    A=DAT1 P
+    A=C&A P
+    DAT1=A P
+    D1=D1+ 16
+    D1=D1+ 16
+    D1=D1+ 2
+    D=D-1 A
+    ?D#0 A
+    GOYES Boucle
+  end;
+end;
+
+procedure LineH (x1, x2, y: integer);
+begin
+   asm
+    A=R1
+    D1=A
+    A=DAT1 A
+    D1=D1+ 5
+    C=DAT1 A
+    ASRB.F A
+    ASRB.F A
+    CSRB.F A
+    CSRB.F A
+    ?C=A A 
+    GOYES CaseOneQuartet
+    GOTO GeneralCase
+    * Cas ou x1 et x2 sur le même quartet
+    :CaseOneQuartet
+    A=R1
+    D1=A
+    D1=D1+ #A
+    C=DAT1 A
+    C=C+C A
+    B=C A
+    CSL A
+    C=B+C A
+    D1=D1- #A
+    A=DAT1 A
+    B=A A
+    ASRB.F A
+    ASRB.F A
+    A=C+A A
+    C=R3
+    A=C+A A
+    R0=A
+    LC(1) #3
+    C=B&C P
+    C=-C P
+    P=C 0
+    LC(4) #8CEF
+    p= 0
+    D=C P
+    D1=D1+ 5
+    A=DAT1 A
+    B=A A
+    LC(1) #3
+    C=B&C P
+    C=-C P
+    P=C 0
+    LC(4) #8CE
+    p= 0
+    A=C P
+    C=D P
+    C=C-A P
+     A=R0
+    D1=A
+    A=DAT1 P 
+    A=C!A P
+    DAT1=A P
+    GOTO FinLineH    
+    * Cas general
+    :GeneralCase
+    A=R1
+    D1=A
+    D1=D1+ #A
+    C=DAT1 A
+    C=C+C A
+    B=C A
+    CSL A
+    C=B+C A
+    D1=D1- #A
+    A=DAT1 A
+    B=A A
+    ASRB.F A
+    ASRB.F A
+    A=C+A A
+    C=R3
+    A=C+A A
+    D1=A
+    LC(1) #3
+    C=B&C P
+    B=C P
+    C=-C P
+    P=C 0
+    LC(4) #8CEF
+    p= 0
+    A=DAT1 P 
+    A=C!A P
+    DAT1=A P
+    LC(5) #4
+    C=C-B P
+    d1=d1+ 1
+    ad1ex
+    r0=a
+    A=R1
+    D1=A
+    D1=D1+ 5
+    A=DAT1 A
+    A=A+1 A
+    D1=D1- 5
+    A=A-C A
+    C=DAT1 A
+    A=A-C A
+    C=A A
+    D=C A
+    CSRB.F A
+    CSRB.F A
+    a=r0
+    d1=a
+    ?C=0 A
+    goyes NoQuartLine
+    :BCLINEH
+    LA(1) #f
+    DAT1=A P
+    D1=D1+ 1
+    C=C-1 A
+    ?C#0 A
+    GOYES BCLINEH
+    :NoQuartLine
+     C=D P 
+     B=C P
+     LC(1) #3
+     C=B&C P
+     C=-C P
+     P=C 0
+     LC(4) #7310
+     p= 0
+     A=DAT1 P 
+     A=C!A P
+     DAT1=A P
+     :FinLineH
+  end;
+end;
+
+procedure ClearLineH (x1, x2, y: integer);
+begin
+   asm
+    A=R1
+    D1=A
+    A=DAT1 A
+    D1=D1+ 5
+    C=DAT1 A
+    ASRB.F A
+    ASRB.F A
+    CSRB.F A
+    CSRB.F A
+    ?C=A A 
+    GOYES cCaseOneQuartet
+    GOTO cGeneralCase
+    * Cas ou x1 et x2 sur le même quartet
+    :cCaseOneQuartet
+    A=R1
+    D1=A
+    D1=D1+ #A
+    C=DAT1 A
+    C=C+C A
+    B=C A
+    CSL A
+    C=B+C A
+    D1=D1- #A
+    A=DAT1 A
+    B=A A
+    ASRB.F A
+    ASRB.F A
+    A=C+A A
+    C=R3
+    A=C+A A
+    R0=A
+    LC(1) #3
+    C=B&C P
+    C=-C P
+    P=C 0
+    LC(4) #7310
+    p= 0
+    D=C P
+    D1=D1+ 5
+    A=DAT1 A
+    B=A A
+    LC(1) #3
+    C=B&C P
+    C=-C P
+    P=C 0
+    LC(4) #08CE
+    p= 0
+    A=C P
+    C=D P
+    C=C!A P
+     A=R0
+    D1=A
+    A=DAT1 P 
+    A=C&A P
+    DAT1=A P
+    GOTO cFinLineH    
+    * Cas general
+    :cGeneralCase
+    A=R1
+    D1=A
+    D1=D1+ #A
+    C=DAT1 A
+    C=C+C A
+    B=C A
+    CSL A
+    C=B+C A
+    D1=D1- #A
+    A=DAT1 A
+    B=A A
+    ASRB.F A
+    ASRB.F A
+    A=C+A A
+    C=R3
+    A=C+A A
+    D1=A
+    LC(1) #3
+    C=B&C P
+    B=C P
+    C=-C P
+    P=C 0
+    LC(4) #7310
+    p= 0
+    A=DAT1 P 
+    A=C&A P
+    DAT1=A P
+    LC(5) #4
+    C=C-B P
+    d1=d1+ 1
+    ad1ex
+    r0=a
+    A=R1
+    D1=A
+    D1=D1+ 5
+    A=DAT1 A
+    A=A+1 A
+    D1=D1- 5
+    A=A-C A
+    C=DAT1 A
+    A=A-C A
+    C=A A
+    D=C A
+    CSRB.F A
+    CSRB.F A
+    a=r0
+    d1=a
+    ?C=0 A
+    goyes cNoQuartLine
+    :cBCLINEH
+    LA(1) #0
+    DAT1=A P
+    D1=D1+ 1
+    C=C-1 A
+    ?C#0 A
+    GOYES cBCLINEH
+    :cNoQuartLine
+     C=D P 
+     B=C P
+     LC(1) #3
+     C=B&C P
+     C=-C P
+     P=C 0
+     LC(4) #8CEF
+     p= 0
+     A=DAT1 P 
+     A=C&A P
+     DAT1=A P
+     :cFinLineH
+  end;
+end;
+
+{ Plus haut niveau }
+
+procedure Line (x1, y1, x2, y2 : integer);
+var x, y : integer;
+     dx, dy : integer;
+     cpt : integer;
+    swap : integer;
+begin
+
+  if x2>x1 then dx := x2-x1 else dx := x1-x2;
+  if y2>y1 then dy := y2-y1 else dy := y1-y2;
+ 
+  if dx>dy then
+  begin 
+      if x2<x1 then 
+      begin
+         swap := x1;
+         x1 :=x2;
+         x2 := swap;
+         swap := y1;
+         y1 := y2;
+         y2 := swap;
+      end;
+      if y2>y1 then swap := 3 else swap := 1;
+      y := y1;
+     cpt := 0;
+    for x:=x1 to x2 do
+    begin
+      cpt := cpt + dy;
+      if cpt>= dx then begin y:=y+swap-2; cpt:=cpt-dx; end;
+      putpixel (x, y);
+    end;
+   end;
+
+    if dy>=dx then
+    begin 
+      if y2<y1 then 
+      begin
+         swap := x1;
+         x1 :=x2;
+         x2 := swap;
+         swap := y1;
+         y1 := y2;
+         y2 := swap;
+      end;
+      if x2>x1 then swap := 3 else swap := 1;
+      x := x1;
+     cpt := 0;
+    for y:=y1 to y2 do
+    begin
+      cpt := cpt + dx;
+      if cpt>= dy then begin x:=x+swap-2; cpt:=cpt-dy; end;
+      putpixel (x, y);
+    end;
+  end;
+end;
+
+procedure ClearLine (x1, y1, x2, y2 : integer);
+var x, y : integer;
+     dx, dy : integer;
+     cpt : integer;
+    swap : integer;
+begin
+
+  if x2>x1 then dx := x2-x1 else dx := x1-x2;
+  if y2>y1 then dy := y2-y1 else dy := y1-y2;
+ 
+  if dx>dy then
+  begin 
+      if x2<x1 then 
+      begin
+         swap := x1;
+         x1 :=x2;
+         x2 := swap;
+         swap := y1;
+         y1 := y2;
+         y2 := swap;
+      end;
+      if y2>y1 then swap := 3 else swap := 1;
+      y := y1;
+     cpt := 0;
+    for x:=x1 to x2 do
+    begin
+      cpt := cpt + dy;
+      if cpt>= dx then begin y:=y+swap-2; cpt:=cpt-dx; end;
+      clearpixel (x, y);
+    end;
+   end;
+
+    if dy>=dx then
+    begin 
+      if y2<y1 then 
+      begin
+         swap := x1;
+         x1 :=x2;
+         x2 := swap;
+         swap := y1;
+         y1 := y2;
+         y2 := swap;
+      end;
+      if x2>x1 then swap := 3 else swap := 1;
+      x := x1;
+     cpt := 0;
+    for y:=y1 to y2 do
+    begin
+      cpt := cpt + dx;
+      if cpt>= dy then begin x:=x+swap-2; cpt:=cpt-dy; end;
+      clearpixel (x, y);
+    end;
+  end;
+end;
+
+procedure Box (x1, y1, x2, y2 : integer);
+begin
+    lineh (x1, x2, y1);
+    lineh (x1, x2, y2);
+    linev (x1, y1, y2);
+    linev (x2, y1, y2);
+end;
+
+procedure ClearBox (x1, y1, x2, y2 : integer);
+begin
+    clearlineh (x1, x2, y1);
+    clearlineh (x1, x2, y2);
+    clearlinev (x1, y1, y2);
+    clearlinev (x2, y1, y2);
+end;
+
+procedure Circle (Cx, Cy, R: integer);
+var x, y, rc: integer;
+begin
+   y := r-1;
+   rc := r*r;
+   for x:=0 to r do
+   begin
+      if  rc<=x*x+y*y then 
+      begin
+         y:=y-1;
+         while rc<x*x+y*y do
+        begin
+            putpixel (cx-x, cy-y);
+            putpixel (cx+x, cy-y);
+            putpixel (cx-x, cy+y);
+            putpixel (cx+x, cy+y);
+            y:=y-1;
+        end;
+      end;     
+       putpixel (cx-x, cy-y);
+       putpixel (cx+x, cy-y);
+       putpixel (cx-x, cy+y);
+       putpixel (cx+x, cy+y);
+   end;
+end;
+
+procedure ClearCircle (Cx, Cy, R: integer);
+var x, y, rc: integer;
+begin
+   y := r-1;
+   rc := r*r;
+   for x:=0 to r do
+   begin
+      if  rc<=x*x+y*y then 
+      begin
+         y:=y-1;
+         while rc<x*x+y*y do
+        begin
+            clearpixel (cx-x, cy-y);
+            clearpixel (cx+x, cy-y);
+            clearpixel (cx-x, cy+y);
+            clearpixel (cx+x, cy+y);
+            y:=y-1;
+        end;
+      end;     
+       clearpixel (cx-x, cy-y);
+       clearpixel (cx+x, cy-y);
+       clearpixel (cx-x, cy+y);
+       clearpixel (cx+x, cy+y);
+   end;
+end;
+
+procedure Disc (Cx, Cy, R: integer);
+var x, y, rc: integer;
+begin
+   y := r;
+   rc := r*r;
+   for x:=0 to r do
+   begin
+       while rc<x*x+y*y do
+       begin
+           y:=y-1;
+           lineh (cx-x, cx+x, cy-y);
+           lineh (cx-x, cx+x, cy+y);
+       end;  
+   end;
+end;
+
+procedure ClearDisc (Cx, Cy, R: integer);
+var x, y, rc: integer;
+begin
+   y := r;
+   rc := r*r;
+   for x:=0 to r do
+   begin
+       while rc<x*x+y*y do
+       begin
+           y:=y-1;
+           clearlineh (cx-x, cx+x, cy-y);
+           clearlineh (cx-x, cx+x, cy+y);
+       end;  
+   end;
+end;
+
+procedure Bar (x1, y1, x2, y2 : integer);
+var y: integer;
+begin
+   for y:= y1 to y2 do LineH (x1, x2, y);
+end;
+
+procedure ClearBar (x1, y1, x2, y2 : integer);
+var y: integer;
+begin
+   for y:= y1 to y2 do ClearLineH (x1, x2, y);
+end;
